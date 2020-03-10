@@ -146,7 +146,7 @@ router.post('/getTimeLine', function (req, res, next) {
         }
 
         console.log(JSON.stringify())
-        res.send(JSON.stringify(respArray));
+        res.json(JSON.stringify(respArray));
     });
 
 });
