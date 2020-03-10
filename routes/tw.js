@@ -108,8 +108,8 @@ router.post('/getTimeLine', function (req, res, next) {
     let timestamp = req.body.since
     // run_cmd("twint", ["-u", username, "--since", "\"" + formatDate(timestamp * 1000, 'Lllss') + "\""], function (text) {
     run_cmd("twint -u "+username+" --since \"" + formatDate(timestamp * 1000, 'Lllss') + "\"", function (text) {
-        console.log(text)
         let array = text.split(/r?n/)
+        console.log(array)
         let respArray = []
         for (let line in array) {
             let detail = array[line].split(" ")
@@ -118,7 +118,11 @@ router.post('/getTimeLine', function (req, res, next) {
                 wrapper[index] = detail[index]
             }
             let encryptItem = wrapper[5]
-            wrapper[5] = Decrypt(encryptItem)
+            console.log(encryptItem)
+            let scret = Encrypt(encryptItem);
+            console.log(scret)
+            wrapper[5] = scret
+            
             respArray[line] = wrapper
         }
         console.log(JSON.stringify(respArray))
