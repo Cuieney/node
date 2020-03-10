@@ -1,7 +1,30 @@
 var express = require('express');
 var router = express.Router();
 var fun_aes = require('../public/javascripts/aes')
+var fs = require('fs');
+var readline = require('readline');
 
+// /*
+// * 按行读取文件内容
+// * 返回：字符串数组
+// * 参数：fReadName:文件名路径
+// *      callback:回调函数
+// * */
+// function readFileToArr(fReadName, callback) {
+//     var fRead = fs.createReadStream(fReadName);
+//     var objReadline = readline.createInterface({
+//         input: fRead
+//     });
+//     var arr = new Array();
+//     objReadline.on('line', function (line) {
+//         arr.push(line);
+//         //console.log('line:'+ line);
+//     });
+//     objReadline.on('close', function () {
+//         // console.log(arr);
+//         callback(arr);
+//     });
+// }
 function Encrypt(word) {
     var srcs = fun_aes.CryptoJS.enc.Utf8.parse(word);
     var key = fun_aes.CryptoJS.enc.Utf8.parse("5b9c2ed3e19c40e5");
@@ -41,19 +64,17 @@ function run_cmd(cmd, args, callBack) {
 
 function run_cmd(cmd, callBack) {
     var exec = require('child_process').exec;
-    var child = exec(cmd);
+    var child = exec("ls -al");
     var resp = "";
-    child.stdout.on('data', function (data) {
-        console.log('stdout: ' + data);
-        resp += data.toString()
+
+    const objReadline = require('readline').createInterface({ input: child.stdout });
+
+    var arr = new Array();
+    objReadline.on('line', function (line) {
+        arr.push(line);
     });
-    child.stderr.on('data', function (data) {
-        console.log('stdout: ' + data);
-        resp += data.toString()
-    });
-    child.on('close', function (code) {
-        console.log('closing code: ' + code);
-        callBack(resp)
+    objReadline.on('close', function () {
+        callBack(arr);
     });
 }
 
@@ -107,25 +128,25 @@ router.post('/getTimeLine', function (req, res, next) {
     let username = req.body.username
     let timestamp = req.body.since
     // run_cmd("twint", ["-u", username, "--since", "\"" + formatDate(timestamp * 1000, 'Lllss') + "\""], function (text) {
-    run_cmd("twint -u "+username+" --since \"" + formatDate(timestamp * 1000, 'Lllss') + "\"", function (text) {
-        let array = text.split(/r?n/)
+    run_cmd("twint -u " + username + " --since \"" + formatDate(timestamp * 1000, 'Lllss') + "\"", function (array) {
         console.log(array)
         let respArray = []
-        for (let line in array) {
-            let detail = array[line].split(" ")
+
+        for (let index in array) {
+            let item = array[index].split(" ")
             let wrapper = []
-            for (let index in detail) {
-                wrapper[index] = detail[index]
+            for (let itemIndex in item) {
+                wrapper[itemIndex] = item[itemIndex]
             }
-            let encryptItem = wrapper[5]
+            let encryptItem = wrapper[0]
             console.log(encryptItem)
             let scret = Encrypt(encryptItem);
             console.log(scret)
-            wrapper[5] = scret
-            
-            respArray[line] = wrapper
+            wrapper[0] = scret
+            respArray[index] = respArray
         }
-        console.log(JSON.stringify(respArray))
+
+        console.log(JSON.stringify())
         res.send(JSON.stringify(respArray));
     });
 
