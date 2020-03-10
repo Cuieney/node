@@ -33,7 +33,7 @@ function recevieData(data) {
     if ('XAU'.indexOf(name) >= 0) {
         JSON.stringify(resData.Sell)
         console.log('XAU',JSON.stringify(resData.Sell))
-        if(resData.Sell >=1663.0){
+        if(resData.Sell >=1700.0){
             nofityUser("当前已涨到"+JSON.stringify(resData.Sell))
         }
     }
