@@ -64,7 +64,7 @@ function run_cmd(cmd, args, callBack) {
 
 function run_cmd(cmd, callBack) {
     var exec = require('child_process').exec;
-    var child = exec("ls -al");
+    var child = exec(cmd);
     var resp = "";
 
     const objReadline = require('readline').createInterface({ input: child.stdout });
@@ -138,12 +138,11 @@ router.post('/getTimeLine', function (req, res, next) {
             for (let itemIndex in item) {
                 wrapper[itemIndex] = item[itemIndex]
             }
-            let encryptItem = wrapper[0]
-            console.log(encryptItem)
+            let encryptItem = wrapper[5]
             let scret = Encrypt(encryptItem);
             console.log(scret)
-            wrapper[0] = scret
-            respArray[index] = respArray
+            wrapper[5] = scret
+            respArray[index] = wrapper
         }
 
         console.log(JSON.stringify())
