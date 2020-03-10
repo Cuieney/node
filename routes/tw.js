@@ -28,11 +28,34 @@ router.get('/', function (req, res, next) {
 function run_cmd(cmd, args, callBack) {
     var spawn = require('child_process').spawn;
     var child = spawn(cmd, args);
+    console.log(cmd, args)
+    console.log(child.error.stack);
     var resp = "";
-
-    child.stdout.on('data', function (buffer) { resp += buffer.toString() });
-    child.stdout.on('end', function () { callBack(resp) });
+    child.stdout.on('data', function (buffer) {
+        resp += buffer.toString()
+    });
+    child.stdout.on('end', function () {
+        callBack(resp)
+    });
 };
+
+function run_cmd(cmd, callBack) {
+    var exec = require('child_process').exec;
+    var child = exec(cmd);
+    var resp = "";
+    child.stdout.on('data', function (data) {
+        console.log('stdout: ' + data);
+        resp += data.toString()
+    });
+    child.stderr.on('data', function (data) {
+        console.log('stdout: ' + data);
+        resp += data.toString()
+    });
+    child.on('close', function (code) {
+        console.log('closing code: ' + code);
+        callBack(resp)
+    });
+}
 
 function padStart(sourceString, targetLength, padString = ' ') {
     padString = typeof padString === 'string' ? padString : String(padString);
@@ -56,7 +79,7 @@ function formatDate(val, format) {
             return `${year}/${month}/${date}`;
         },
         Lllss: function () {
-            return `${year}/${month}/${date} ${hours}:${mins}:${seconds}`;
+            return `${year}-${month}-${date} ${hours}:${mins}:${seconds}`;
         },
         Lllmm: function () {
             return `${year}-${month}-${date}  ${hours}:${mins}`;
@@ -83,13 +106,15 @@ function formatDate(val, format) {
 router.post('/getTimeLine', function (req, res, next) {
     let username = req.body.username
     let timestamp = req.body.since
-    run_cmd("twint", ["-u",username,"--since","\""+formatDate(timestamp*1000,'Lllss')+"\""], function (text) { 
+    // run_cmd("twint", ["-u", username, "--since", "\"" + formatDate(timestamp * 1000, 'Lllss') + "\""], function (text) {
+    run_cmd("twint -u "+username+" --since \"" + formatDate(timestamp * 1000, 'Lllss') + "\"", function (text) {
+        console.log(text)
         let array = text.split(/r?n/)
         let respArray = []
-        for(let line in array){
+        for (let line in array) {
             let detail = array[line].split(" ")
             let wrapper = []
-            for(let index in detail){
+            for (let index in detail) {
                 wrapper[index] = detail[index]
             }
             let encryptItem = wrapper[5]
@@ -98,13 +123,8 @@ router.post('/getTimeLine', function (req, res, next) {
         }
         console.log(JSON.stringify(respArray))
         res.send(JSON.stringify(respArray));
-     });
-  
+    });
 
 });
-
-
-
-
 
 module.exports = router;
