@@ -1,6 +1,5 @@
 const WebSocket = require('ws');
 const request = require('request');
-var ws = new WebSocket('ws://39.97.117.240:9506/');
 const cmdJson = {
     cmd: "sub",
     codes: ["XAU", "USD", "AU9999"]
@@ -17,20 +16,29 @@ var token = {
     isSend: false
 }
 
-ws.on('close', function open() {
-    console.log('close')
-    ws = new WebSocket('ws://39.97.117.240:9506/');
-});
+function connectWS() {
+    let ws = new WebSocket('ws://39.97.117.240:9506/');
+    ws.on('open', function open() {
+        console.log('open')
+        ws.send(JSON.stringify(cmdJson));
+    });
 
-ws.on('open', function open() {
-    console.log('open')
-    ws.send(JSON.stringify(cmdJson));
-});
+    ws.on('message', function incoming(data) {
+        // console.log(data)
+        recevieData(data)
+    });
+    ws.on('close', function open() {
+        console.log('close')
+        connectWS()
+    });
+}
 
-ws.on('message', function incoming(data) {
-    // console.log(data)
-    recevieData(data)
-});
+Promise.all([connectWS()])
+    .then(() => {
+        console.log('启动socket链接')
+    }).catch((error) => {
+        console.log('启动socket链接异常',error)
+    })
 
 function recevieData(data) {
     var resData = JSON.parse(data)
