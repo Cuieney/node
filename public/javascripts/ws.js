@@ -20,7 +20,9 @@ function connectWS() {
     let ws = new WebSocket('ws://39.97.117.240:9506/');
     ws.on('open', function open() {
         console.log('open')
-        ws.send(JSON.stringify(cmdJson));
+        ws.send(JSON.stringify(cmdJson),()=>{
+            console.log('发送成功')
+        });
     });
 
     ws.on('message', function incoming(data) {
@@ -29,6 +31,10 @@ function connectWS() {
     });
     ws.on('close', function open() {
         console.log('close')
+        connectWS()
+    });
+    ws.on('error', function open(msg) {
+        console.log('error',msg)
         connectWS()
     });
 }
@@ -46,7 +52,7 @@ function recevieData(data) {
 
     if ('XAU'.indexOf(name) >= 0) {
         JSON.stringify(resData.Sell)
-        console.log('XAU', JSON.stringify(resData.Sell))
+        // console.log('XAU', JSON.stringify(resData.Sell))
         if (resData.Sell >= 1690.0) {
             nofityUser("当前已涨到" + JSON.stringify(resData.Sell))
         }

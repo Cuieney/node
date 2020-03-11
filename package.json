@@ -5,7 +5,10 @@
   "scripts": {
     "start": "node ./bin/www",
     "pkg": {
-      "assets": ["public/**/*", "views/**/*"]
+      "assets": [
+        "public/**/*",
+        "views/**/*"
+      ]
     }
   },
   "dependencies": {
