@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 const request = require('request');
-const ws = new WebSocket('ws://39.97.117.240:9506/');
+var ws = new WebSocket('ws://39.97.117.240:9506/');
 const cmdJson = {
     cmd: "sub",
     codes: ["XAU", "USD", "AU9999"]
@@ -14,10 +14,16 @@ const userId = 'oG0br0HA-pjL5Df5EeKazVsUKMcc'
 
 var token = {
     access_token: "",
-    isSend:false
+    isSend: false
 }
 
+ws.on('close', function open() {
+    console.log('close')
+    ws = new WebSocket('ws://39.97.117.240:9506/');
+});
+
 ws.on('open', function open() {
+    console.log('open')
     ws.send(JSON.stringify(cmdJson));
 });
 
@@ -32,13 +38,13 @@ function recevieData(data) {
 
     if ('XAU'.indexOf(name) >= 0) {
         JSON.stringify(resData.Sell)
-        console.log('XAU',JSON.stringify(resData.Sell))
-        if(resData.Sell >=1690.0){
-            nofityUser("当前已涨到"+JSON.stringify(resData.Sell))
+        console.log('XAU', JSON.stringify(resData.Sell))
+        if (resData.Sell >= 1690.0) {
+            nofityUser("当前已涨到" + JSON.stringify(resData.Sell))
         }
-	if(resData.Sell <= 1650.0 ){
-	   nofityUser("当前已跌到"+JSON.stringify(resData.Sell))
-	}
+        if (resData.Sell <= 1650.0) {
+            nofityUser("当前已跌到" + JSON.stringify(resData.Sell))
+        }
     }
     if ('USD'.indexOf(name) >= 0) {
         // console.log(recevieData.Sell)
@@ -51,7 +57,7 @@ function recevieData(data) {
 }
 
 request(getAccTokenUrl, function (error, response, body) {
-    if (!error && response.statusCode == 200) {        
+    if (!error && response.statusCode == 200) {
         token.access_token = JSON.parse(body).access_token
     } else {
         console.error('error:', error);
@@ -59,12 +65,12 @@ request(getAccTokenUrl, function (error, response, body) {
     }
 });
 
-setInterval(()=>{
+setInterval(() => {
     token.isSend = false
-},30*1000)
+}, 50 * 1000)
 
 function nofityUser(result) {
-    if(token.isSend){
+    if (token.isSend) {
         console.log('已发送')
         return
     }
