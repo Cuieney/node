@@ -85,7 +85,7 @@ setInterval(() => {
 
 function nofityUser(result) {
     if (token.isSend) {
-        console.log('已发送')
+        // console.log('已发送')
         return
     }
     token.isSend = true
