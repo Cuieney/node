@@ -5,6 +5,8 @@ const cmdJson = {
     codes: ["XAU", "USD", "AU9999"]
 }
 
+var show = require('./user')
+
 const getAccTokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx8806c763d6ea5bf4&secret=c0fb63d07b1edb24fdddae6d75d4f6f7"
 const postSubscribeUrl = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send"
 // accToken = content['access_token']
@@ -20,7 +22,7 @@ function connectWS() {
     let ws = new WebSocket('ws://39.97.117.240:9506/');
     ws.on('open', function open() {
         console.log('open')
-        ws.send(JSON.stringify(cmdJson),()=>{
+        ws.send(JSON.stringify(cmdJson), () => {
             console.log('发送成功')
         });
     });
@@ -34,7 +36,7 @@ function connectWS() {
         connectWS()
     });
     ws.on('error', function open(msg) {
-        console.log('error',msg)
+        console.log('error', msg)
         connectWS()
     });
 }
@@ -43,22 +45,31 @@ Promise.all([connectWS()])
     .then(() => {
         console.log('启动socket链接')
     }).catch((error) => {
-        console.log('启动socket链接异常',error)
+        console.log('启动socket链接异常', error)
     })
 
-function recevieData(data) {
+async function recevieData(data) {
     var resData = JSON.parse(data)
     var name = resData.C
-
+    
     if ('XAU'.indexOf(name) >= 0) {
-        JSON.stringify(resData.Sell)
-        // console.log('XAU', JSON.stringify(resData.Sell))
-        if (resData.Sell >= 1690.0) {
-            nofityUser("当前已涨到" + JSON.stringify(resData.Sell))
+        // JSON.stringify(resData.Sell)
+        // // console.log('XAU', JSON.stringify(resData.Sell))
+        let result = await show.show();
+        if(result.length >0 ){
+            for(let index in result){
+                let height = result[index].height
+                let low  = result[index].low
+                let openId = result[index].openId
+                if(resData.Sell > height){
+                    nofityUser(openId,"当前已涨到" + JSON.stringify(resData.Sell))
+                }
+                if(resData.Sell < low){
+                    nofityUser(openId,"当前已跌到" + JSON.stringify(resData.Sell))
+                }
+            }
         }
-        if (resData.Sell <= 1650.0) {
-            nofityUser("当前已跌到" + JSON.stringify(resData.Sell))
-        }
+
     }
     if ('USD'.indexOf(name) >= 0) {
         // console.log(recevieData.Sell)
@@ -83,14 +94,14 @@ setInterval(() => {
     token.isSend = false
 }, 50 * 1000)
 
-function nofityUser(result) {
+function nofityUser(openId,result) {
     if (token.isSend) {
         // console.log('已发送')
         return
     }
     token.isSend = true
     let data = {
-        "touser": userId,
+        "touser": openId,
         "template_id": 'TujC6M699Qq68iivGaH2NN3h2BgPrXXyHFKeXH6X1yk',
         "page": "pages/index/index",
         "data": {
