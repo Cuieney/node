@@ -13,26 +13,8 @@ router.get('/', function (req, res, next) {
 
 router.get('/show', async (req, res, next) => {
   try {
-    // let result = await show.show();
-    // console.log(result)
-    let Sell = req.query.value
-    console.log(Sell)
     let result = await show.show();
-    console.log(result.length)
-    if(result.length >0 ){
-        for(let index in result){
-          console.log(index,result[index])
-            let height = result[index].height
-            let low  = result[index].low
-            let openId = result[index].openId
-            if(Sell > height){
-                console.log(openId,"当前已涨到" + JSON.stringify(Sell))
-            }
-            if(Sell < low){
-              console.log(openId,"当前已跌到" + JSON.stringify(Sell))
-            }
-        }
-    }
+    console.log(result)
 
     res.send(result);
   } catch (e) {
