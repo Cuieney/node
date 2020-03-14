@@ -90,15 +90,27 @@ request(getAccTokenUrl, function (error, response, body) {
     }
 });
 
+function reqeustToken(){
+    request(getAccTokenUrl, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            token.access_token = JSON.parse(body).access_token
+        } else {
+            console.error('error:', error);
+            console.log('statusCode:', response && response.statusCode);
+        }
+    });
+}
+
 setInterval(() => {
     token.isSend = false
-}, 50 * 1000)
+}, 60 * 1000)
 
-function nofityUser(openId,result) {
+async function nofityUser(openId,result) {
     if (token.isSend) {
         // console.log('已发送')
         return
     }
+    await reqeustToken()
     token.isSend = true
     let data = {
         "touser": openId,
